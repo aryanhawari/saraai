@@ -35,19 +35,19 @@ export const siteConfig = {
   secondaryTagline: "Your AI. Your assistant.",
   developer: {
     name: "Aryan Hawari",
-    title: "Developer & AI Student",
-    bio: "I build AI assistants, apps and modern websites. Focused on fast, clean and useful technology.",
+    title: "Creator & Developer of SARA AI",
+    bio: "Aryan is a young developer with one simple dream: to build his own AI. SARA AI is that dream, made real — a fast, friendly and private assistant created by him, for everyone. He designs everything himself: the brain, the thinking, the look. Every update makes SARA smarter, faster and more helpful.",
     avatar: "/assets/developer.jpg",
-    location: "Nepal",
+    location: "Kalaiya, Bara, Nepal",
     skills: [
+      "Own AI Engine",
       "AI / ML",
       "React",
       "Python",
       "FastAPI",
       "Android",
       "Kotlin",
-      "Web Dev",
-      "Security"
+      "Web Dev"
     ]
   }
 };

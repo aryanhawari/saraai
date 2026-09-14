@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Download, Sparkles, ArrowRight, Layers, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { saraFeatures } from '../data/features';
 import { FeatureCard } from '../components/FeatureCard';
+import { SaraBrainSection } from '../components/SaraBrainSection';
 import { ModeInteractiveShowcase } from '../components/ModeInteractiveShowcase';
 import { TechStackSection } from '../components/TechStackSection';
 import { DownloadSection } from '../components/DownloadSection';
@@ -121,6 +122,9 @@ export const SaraAI: React.FC = () => {
 
       {/* 3. SARA AI Modes Section */}
       <ModeInteractiveShowcase />
+
+      {/* 3.5 Inside SARA AI's Brain — own engine, creator story */}
+      <SaraBrainSection />
 
       {/* 4. Technology Section: POWERING SARA AI */}
       <TechStackSection />

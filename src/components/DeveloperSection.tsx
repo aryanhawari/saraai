@@ -78,7 +78,7 @@ export const DeveloperSection: React.FC<DeveloperSectionProps> = ({ showTitle = 
                   <span className="text-[11px] text-neutral-500 font-mono">• Founder</span>
                 </div>
                 <div className="text-[11px] font-mono text-red-600 font-semibold">
-                  Nepal
+                  Kalaiya, Bara
                 </div>
               </div>
             </div>
@@ -107,11 +107,11 @@ export const DeveloperSection: React.FC<DeveloperSectionProps> = ({ showTitle = 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-neutral-600">
                 <div className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-red-600" />
-                  <span>Based in Nepal, works worldwide</span>
+                  <span>Kalaiya, Bara, Nepal</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Cpu className="w-4 h-4 text-red-600" />
-                  <span>AI, apps &amp; websites</span>
+                  <span>Own AI engine — designed &amp; trained by him</span>
                 </div>
               </div>
 

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Hero } from '../components/Hero';
 import { CapabilityMarquee } from '../components/CapabilityMarquee';
 import { AboutSaraSection } from '../components/AboutSaraSection';
+import { SaraBrainSection } from '../components/SaraBrainSection';
 import { FeatureCard } from '../components/FeatureCard';
 import { ModeInteractiveShowcase } from '../components/ModeInteractiveShowcase';
 import { DownloadSection } from '../components/DownloadSection';
@@ -28,6 +29,9 @@ export const Home: React.FC = () => {
       <div className="space-y-2 sm:space-y-4 pt-4">
         {/* 3. About SARA AI */}
         <AboutSaraSection />
+
+        {/* 3.5 Inside SARA AI's Brain — own engine, creator story */}
+        <SaraBrainSection />
 
         {/* 4. SARA AI Modes Interactive Showcase */}
         <ModeInteractiveShowcase />
