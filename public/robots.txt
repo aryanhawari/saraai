@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://saraai.vercel.app/sitemap.xml
+Sitemap: https://saraaichatbot.vercel.app/sitemap.xml

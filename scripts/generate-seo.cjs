@@ -31,13 +31,23 @@ function readSiteUrl() {
     }
     return cleaned;
   }
+
+  // No valid SITE_URL: keep the sitemap already committed in public/ (it was
+  // generated with the correct production domain) instead of guessing.
+  if (fs.existsSync(path.join(__dirname, '..', 'public', 'sitemap.xml'))) {
+    console.log('[generate-seo] SITE_URL not set — keeping existing public/sitemap.xml');
+    return null;
+  }
   return DEFAULT_SITE;
 }
 
-const SITE = readSiteUrl();
-const today = new Date().toISOString().slice(0, 10);
+function generateSeo() {
+  const SITE = readSiteUrl();
+  if (!SITE) return;
 
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  const today = new Date().toISOString().slice(0, 10);
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${SITE}/</loc>
@@ -48,12 +58,15 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 </urlset>
 `;
 
-const robots = `User-agent: *
+  const robots = `User-agent: *
 Allow: /
 
 Sitemap: ${SITE}/sitemap.xml
 `;
 
-fs.writeFileSync(path.join(__dirname, '..', 'public', 'sitemap.xml'), sitemap);
-fs.writeFileSync(path.join(__dirname, '..', 'public', 'robots.txt'), robots);
-console.log(`[generate-seo] sitemap.xml + robots.txt written for ${SITE}`);
+  fs.writeFileSync(path.join(__dirname, '..', 'public', 'sitemap.xml'), sitemap);
+  fs.writeFileSync(path.join(__dirname, '..', 'public', 'robots.txt'), robots);
+  console.log(`[generate-seo] sitemap.xml + robots.txt written for ${SITE}`);
+}
+
+generateSeo();
