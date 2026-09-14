@@ -11,6 +11,7 @@
 
 import express from 'express';
 import nodemailer from 'nodemailer';
+import { GoogleGenAI } from '@google/genai';
 import 'dotenv/config';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +22,8 @@ const PORT = process.env.PORT || 8787;
 const CONTACT_TO = process.env.CONTACT_TO || 'saraaihawari90@gmail.com';
 const GMAIL_USER = process.env.GMAIL_USER || '';
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || '';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 const app = express();
 app.disable('x-powered-by');
@@ -129,8 +132,90 @@ app.get('/api/health', (req, res) => {
     ok: true,
     service: 'sara-ai-backend',
     mailer: GMAIL_USER && GMAIL_APP_PASSWORD ? 'gmail-smtp' : 'formsubmit-relay',
+    chat: GEMINI_API_KEY ? 'gemini-live' : 'simulated',
     time: new Date().toISOString(),
   });
+});
+
+// ---------- SARA chat (real Gemini replies, key stays server-side) ----------
+const chatHits = new Map();
+const CHAT_LIMIT = 20;
+const CHAT_WINDOW_MS = 10 * 60 * 1000;
+
+function chatRateLimit(req, res, next) {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const recent = (chatHits.get(ip) || []).filter((t) => now - t < CHAT_WINDOW_MS);
+  if (recent.length >= CHAT_LIMIT) {
+    res.status(429).json({
+      ok: false,
+      reply: 'SARA needs a short break — too many messages from this device. Try again in a few minutes.',
+    });
+    return;
+  }
+  recent.push(now);
+  chatHits.set(ip, recent);
+  next();
+}
+
+const MODE_STYLE = {
+  fast: 'Answer instantly and briefly — like a helpful friend texting back.',
+  thinker: 'Reason step by step: show a short numbered reasoning, then a clear final answer.',
+  search: 'Answer from your own knowledge (no live browsing here). Be accurate and honest about anything uncertain.',
+};
+
+function buildSystemPrompt(mode) {
+  return `You are SARA AI — a warm, personal AI assistant inside the SARA Android app, built by Aryan Hawari, a developer from Nepal.
+
+Identity rules (never break these):
+- If asked your name → you are "SARA" (SARA AI), a personal AI assistant.
+- If asked who made/created/built you → "Aryan Hawari" — a developer from Nepal. If the user says "sir", reply respectfully like "I was made by Aryan Hawari sir."
+- If asked which model/engine powers you → NEVER name Google, Gemini or any company. Reply exactly in this spirit: "I'm SARA AI, made by Aryan Hawari sir."
+- Reply in the language the user writes in (English, Hindi, Hinglish, or Nepali).
+
+Formatting (always fully formatted, never a plain wall of text):
+- Short paragraphs, bullet points or numbered steps where helpful, at most one or two emojis.
+- Mobile-chat length: under ~120 words unless the user clearly asks for more.
+- For code requests, use a clean fenced code block with the language tag.
+
+Current conversation style: ${MODE_STYLE[mode] || MODE_STYLE.fast}`;
+}
+
+app.post('/api/chat', chatRateLimit, async (req, res) => {
+  const message = clean(req.body?.message, 1000);
+  const mode = ['fast', 'thinker', 'search'].includes(req.body?.mode) ? req.body.mode : 'fast';
+
+  if (!message) {
+    res.status(400).json({ ok: false, reply: 'Please type a message for SARA.' });
+    return;
+  }
+
+  if (!GEMINI_API_KEY) {
+    res.status(503).json({ ok: false, reply: 'SARA\'s live brain is not configured on this server yet.' });
+    return;
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: message,
+      config: {
+        systemInstruction: buildSystemPrompt(mode),
+        maxOutputTokens: 700,
+        temperature: 0.7,
+      },
+    });
+    const reply = (response?.text || '').trim();
+    if (!reply) throw new Error('empty reply');
+    res.json({ ok: true, reply });
+  } catch (err) {
+    console.error('[chat] failed:', err?.message || err);
+    res.status(502).json({
+      ok: false,
+      reply: 'SARA is having trouble thinking right now. Please try again in a moment.',
+    });
+  }
 });
 
 app.post('/api/contact', rateLimit, async (req, res) => {

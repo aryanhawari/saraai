@@ -21,6 +21,7 @@ import {
   Terminal,
   ExternalLink
 } from 'lucide-react';
+import { renderSaraText } from '../lib/saraFormat';
 
 interface SaraPhoneMockupProps {
   compact?: boolean;
@@ -347,8 +348,25 @@ if __name__ == "__main__":
     };
   };
 
+  // Real SARA reply via the backend (Gemini runs server-side, key stays private).
+  // Returns null when the backend is down → offline demo brain takes over.
+  const askSaraApi = async (text: string): Promise<string | null> => {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ message: text, mode: 'fast' }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json().catch(() => null);
+      return data?.ok && typeof data.reply === 'string' && data.reply.trim() ? data.reply.trim() : null;
+    } catch {
+      return null;
+    }
+  };
+
   // Send & AI Response Handler
-  const handleSend = (e?: React.FormEvent, customText?: string) => {
+  const handleSend = async (e?: React.FormEvent, customText?: string) => {
     if (e) e.preventDefault();
     const textToSend = customText || inputVal.trim();
     if (!textToSend) return;
@@ -362,8 +380,23 @@ if __name__ == "__main__":
     ]);
 
     setIsTyping(true);
+    const startedAt = Date.now();
 
-    // Contextual, natural human-like AI responses
+    // Live reply first; keep a natural chat rhythm even when the API is fast
+    const liveReply = await askSaraApi(textToSend);
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
+
+    if (liveReply) {
+      setMessages((prev) => [
+        ...prev,
+        { id: `sara-${Date.now()}`, sender: 'sara', text: liveReply }
+      ]);
+      setIsTyping(false);
+      return;
+    }
+
+    // Contextual, natural human-like AI responses (offline demo brain)
     setTimeout(() => {
       const lower = textToSend.toLowerCase();
       let newMsg: Partial<Message> = {};
@@ -629,7 +662,7 @@ if __name__ == "__main__":
 
                   {/* SARA Main Response Text */}
                   <div className="text-white text-[15px] sm:text-[15.5px] leading-relaxed font-normal whitespace-pre-wrap select-text pt-0.5">
-                    {msg.text}
+                    {renderSaraText(msg.text)}
                   </div>
 
                   {/* High-Fidelity Color-Coded Syntax Highlighted Code Viewer */}

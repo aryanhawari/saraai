@@ -21,6 +21,8 @@ import {
 import { saraModes } from '../data/modes';
 import { ModeItem } from '../types';
 import { SectionHeader } from './SectionHeader';
+import { askSara } from '../lib/saraChat';
+import { renderSaraText } from '../lib/saraFormat';
 
 interface DemoContent {
   query: string;
@@ -57,6 +59,7 @@ export const ModeInteractiveShowcase: React.FC = () => {
   const [likedState, setLikedState] = useState<'like' | 'dislike' | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
+  const [liveAnswer, setLiveAnswer] = useState<{ question: string; mode: string; text: string } | null>(null);
 
   // Mode Icon dictionary
   const modeIcon = {
@@ -233,7 +236,19 @@ def a_star(graph, start, goal, h):
   };
 
   const [activeScenarioKey, setActiveScenarioKey] = useState<string>('default');
+
+  // A real SARA answer (from /api/chat) takes over the output panel until
+  // the visitor switches mode or preset again.
+  const liveContent: DemoContent | null = liveAnswer
+    ? {
+        query: liveAnswer.question,
+        response: liveAnswer.text,
+        telemetry: { latency: 'Live', tokens: 'SARA', confidence: '100%' },
+      }
+    : null;
+
   const activeContent: DemoContent =
+    liveContent ||
     scenarios[selectedModeId]?.[activeScenarioKey] ||
     scenarios[selectedModeId]?.['default'] ||
     scenarios['thinker']['default'];
@@ -242,6 +257,7 @@ def a_star(graph, start, goal, h):
   const handleSelectMode = (modeId: 'fast' | 'thinker' | 'search') => {
     setSelectedModeId(modeId);
     setActiveScenarioKey('default');
+    setLiveAnswer(null);
     setIsSimulating(true);
     setActiveStepIndex(0);
 
@@ -306,27 +322,34 @@ def a_star(graph, start, goal, h):
     }
   };
 
-  // Custom question submission
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  // Custom question submission — real SARA reply, curated scenarios as fallback
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customPrompt.trim()) return;
+    const queryText = customPrompt.trim();
+    if (!queryText) return;
 
+    setCustomPrompt('');
+    setLiveAnswer(null);
     setIsSimulating(true);
     setActiveStepIndex(0);
-    const queryText = customPrompt.trim();
-    setCustomPrompt('');
 
-    // Check if query is about Aryan or Python or general
-    const lower = queryText.toLowerCase();
-    if (lower.includes('aryan')) {
-      setActiveScenarioKey('aryan');
-    } else {
-      setActiveScenarioKey('default');
+    const startedAt = Date.now();
+    const reply = await askSara(queryText, selectedModeId);
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < 900) await new Promise((r) => setTimeout(r, 900 - elapsed));
+
+    if (reply) {
+      setLiveAnswer({ question: queryText, mode: selectedModeId, text: reply });
+      setIsSimulating(false);
+      return;
     }
 
+    // Offline fallback — curated demo scenarios
+    const lower = queryText.toLowerCase();
+    setActiveScenarioKey(lower.includes('aryan') ? 'aryan' : 'default');
     setTimeout(() => {
       setIsSimulating(false);
-    }, 600);
+    }, 400);
   };
 
   const presetChips: Array<{ key: string; label: string }> = selectedModeId === 'thinker'
@@ -488,7 +511,7 @@ def a_star(graph, start, goal, h):
               {presetChips.map((chip) => (
                 <button
                   key={chip.key}
-                  onClick={() => { setActiveScenarioKey(chip.key); setIsSimulating(false); }}
+                  onClick={() => { setActiveScenarioKey(chip.key); setLiveAnswer(null); setIsSimulating(false); }}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                     activeScenarioKey === chip.key
                       ? 'text-white btn-primary'
@@ -656,7 +679,7 @@ def a_star(graph, start, goal, h):
                 ) : (
                   <>
                     <div className="text-neutral-800 text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap font-normal">
-                      {activeContent.response}
+                      {renderSaraText(activeContent.response)}
                     </div>
 
                     {/* Color-Coded Syntax Code Snippet */}
