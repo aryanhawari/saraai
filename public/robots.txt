@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://saraai.vercel.app/sitemap.xml

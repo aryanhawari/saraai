@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
+    "build": "node scripts/generate-seo.cjs && vite build",
     "preview": "vite preview",
     "start": "node server.js",
     "postinstall": "node scripts/patch-rollup.cjs",
