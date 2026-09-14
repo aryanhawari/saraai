@@ -1,0 +1,6 @@
+{
+  "name": "SARA AI",
+  "description": "Official website for SARA AI — Nepal's intelligent AI chat assistant built by Aryan Hawari.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

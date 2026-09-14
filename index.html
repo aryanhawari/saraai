@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth light" style="color-scheme: light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SARA AI — Intelligent AI Assistant</title>
+    <meta name="description" content="SARA AI — Nepal's intelligent AI chat assistant with deep reasoning, live web search, voice interaction and persistent memory. Built by Aryan Hawari." />
+    <meta name="keywords" content="SARA AI, AI Assistant, Nepal AI, AI Chatbot, Personal AI Assistant, Aryan Hawari, SARA AI Nepal" />
+    <meta name="author" content="Aryan Hawari" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+
+    <meta property="og:title" content="SARA AI — Intelligent AI Assistant" />
+    <meta property="og:description" content="Nepal's intelligent AI chat assistant — deep reasoning, live web search, voice interaction and persistent memory in one lightweight Android app." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/sara-og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SARA AI — Intelligent AI Assistant" />
+    <meta name="twitter:description" content="Nepal's intelligent AI chat assistant — deep reasoning, live web search, voice interaction and persistent memory in one lightweight Android app." />
+    <meta name="twitter:image" content="/assets/sara-og.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23DC2626'/><text x='50' y='64' font-size='42' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>S</text></svg>" />
+
+    <!-- Light mode only — no dark theme -->
+    <script>
+      (function () {
+        try {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          localStorage.setItem('sara-theme', 'light');
+        } catch (e) {}
+      })();
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SARA AI",
+        "operatingSystem": "Android 8.0+",
+        "applicationCategory": "AssistantApplication",
+        "description": "Nepal's intelligent AI chat assistant with deep reasoning, live web search, voice interaction and persistent memory.",
+        "author": { "@type": "Person", "name": "Aryan Hawari" },
+        "softwareVersion": "1.0.0",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
