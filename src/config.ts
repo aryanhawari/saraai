@@ -29,7 +29,7 @@ export const siteConfig = {
   name: "SARA AI",
   badge: "NEPAL'S AI ASSISTANT",
   tagline: "Your intelligent AI companion",
-  description: "SARA AI is a fast AI assistant that chats, reasons, searches the web and remembers context.",
+  description: "SARA AI is a fast, free AI chatbot that chats, reasons, searches the web and remembers context.",
   subTagline: "Built for the future of AI.",
   brandPillars: "Intelligent. Fast. Personal.",
   secondaryTagline: "Your AI. Your assistant.",
