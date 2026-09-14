@@ -8,20 +8,30 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // pull SITE_URL out of .env without any dependency
+// localhost/127.0.0.1 is NEVER allowed into the sitemap — Google can't
+// index it and Search Console rejects it ("not allowed for a Sitemap").
 function readSiteUrl() {
-  const fromProcess = process.env.SITE_URL;
-  if (fromProcess) return fromProcess.replace(/\/+$/, '');
+  const DEFAULT_SITE = 'https://saraai.vercel.app';
+  const candidates = [];
+  if (process.env.SITE_URL) candidates.push(process.env.SITE_URL);
   try {
     const env = fs.readFileSync(path.join(__dirname, '..', '.env'), 'utf8');
     const line = env.split(/\r?\n/).find((l) => l.trim().startsWith('SITE_URL='));
-    if (line) {
-      const value = line.slice(line.indexOf('=') + 1).trim().replace(/^"|"$/g, '');
-      if (value) return value.replace(/\/+$/, '');
-    }
+    if (line) candidates.push(line.slice(line.indexOf('=') + 1).trim().replace(/^"|"$/g, ''));
   } catch {
-    // no .env — fall through to default
+    // no .env — fall through
   }
-  return 'https://saraai.vercel.app';
+
+  for (const candidate of candidates) {
+    const cleaned = candidate.trim().replace(/\/+$/, '');
+    if (!cleaned) continue;
+    if (/localhost|127\.0\.0\.1/i.test(cleaned)) {
+      console.warn(`[generate-seo] Ignoring SITE_URL="${cleaned}" — localhost cannot be used in a sitemap.`);
+      continue;
+    }
+    return cleaned;
+  }
+  return DEFAULT_SITE;
 }
 
 const SITE = readSiteUrl();
